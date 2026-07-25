@@ -53,20 +53,60 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 
 ### Block Diagram
 
-<img src="images/apb_maincontroller.png" width="900">
+<img src="images/apb_maincontroller.png" width="1000">
 
-**Main Control**
-- FSM 관리 및 전체 게임 흐름 제어
+#### Main Control
 
+- 게임의 전체 흐름을 제어하는 FSM
+
+<img src="images/vga_maincontrol_fsm.png" width="600">
+
+- **IDLE**
+  - 게임 시작 전 대기
+
+- **SELECT**
+  - 플레이할 음악 선택
+
+- **READY**
+  - 게임 초기화 및 시작 준비
+
+- **GAME_CONT**
+  - 노트 생성, 판정 및 게임 진행
+
+- **CAPTURE**
+  - 게임 종료 후 카메라 영상 캡처
+
+- **DONE**
+  - 결과 화면 출력 및 게임 종료
+
+
+
+#### **Line count**
+
+<img src="images/vga_linecount_bd.png" width="600">
+
+- `note_start` 신호 입력 시 노트 생성
+- Vertical Sync마다 line count + 3
+- 최대 16개의 노트 동시 관리
+- 화면을 벗어난 노트 비활성화
+
+
+
+
+##### **GameResult, Score**
+
+<img src="images/vga_game_bd.png" width="800">
+
+###### GameResult
+
+- 노트 위치와 카메라 입력을 비교하여 Perfect, Good, Miss 판정
+- 콤보 및 Fever 상태 생성
+- 판정 결과를 Score 모듈에 전달
 - 
+###### Score
 
-**linecounter**
-- 노트 생성 및 이동 제어
+- Perfect, Good 판정에 따른 기본 점수 계산
+- Fever 상태에서 점수 2배 적용
+- 콤보 종료 시 추가 보너스 점수 계산
 
-**GameResult**
-- 노트 판정 및 Combo 및 Fever 판단
 
-**score**
-- 판정 결과 기반 점수 계산
-
-### Main Control
