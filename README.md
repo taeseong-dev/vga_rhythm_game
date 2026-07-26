@@ -10,6 +10,12 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 
 <img src="images/vga_top.png" width="800">
 
+1. Python에서 노트 데이터를 UART로 전송
+2. FPGA가 노트를 생성하여 VGA에 출력
+3. 카메라로 Region을 검출
+4. 노트와 Region을 비교하여 판정
+5. 점수와 결과를 Python으로 전송
+
 ### 주요 모듈
 
 **Receiver (UART)**
@@ -30,7 +36,7 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 - 게임 상태, 버튼 입력, 판정 결과 및 점수 정보를 FIFO에 저장
 - UART를 통해 Python으로 전송
 
-## Recevier
+## Receiver
 
 ### Block Diagram
 
@@ -99,7 +105,7 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 - 노트 위치와 카메라 입력을 비교하여 Perfect, Good, Miss 판정
 - 콤보 및 Fever 상태 생성
 - 판정 결과를 Score 모듈에 전달
-- 
+
 ###### Score
 
 - Perfect, Good 판정에 따른 기본 점수 계산
@@ -139,7 +145,7 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 
 #### Game Processing
 
-<img src="images/vga_rgb.png" width = "500">
+<img src="images/vga_rgb_bd.png" width = "800">
 
 ##### Region Detector
 
@@ -157,3 +163,46 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 ##### Filter Game
 
 - Lane 구분선 및 판정 영역을 화면에 표시
+
+## Sender
+
+<img src="images/vga_sender.png" width = "800">
+
+### Packet Generator
+
+- 게임 정보를 UART 전송 패킷으로 생성
+- 게임 상태, 판정 결과, 콤보 및 점수 데이터 구성
+- Byte 단위 패킷 데이터 출력
+
+### FIFO
+
+- UART 송신 데이터 저장
+- 송신 데이터 버퍼 관리
+
+### UART TX
+
+- UART 프로토콜 기반 직렬 데이터 송신
+- FIFO 데이터 -> Serial TX 신호 출력
+
+## Python
+
+### Modules
+
+#### UART Handler
+
+- FPGA와 UART 통신 수행
+- FPGA에서 받은 데이터 확인
+- 게임 정보를 화면으로 전달
+
+#### Game UI
+
+- 게임 화면 표시
+- 게임 진행 상태 관리
+- FPGA 상태에 따라 화면 전환
+- 게임 결과 표시
+
+#### Config
+
+- UART 통신 설정 관리
+- 게임 환경 설정
+- 화면 및 상태 정보 관리
