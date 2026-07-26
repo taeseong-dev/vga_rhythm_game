@@ -6,6 +6,11 @@ OV7670 카메라와 VGA를 기반으로 구현한 FPGA 리듬게임입니다.
 
 https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 
+- Language : Verilog, Python
+- Tool : Vivado 2020.2, Pygame
+- Board : Basys3
+- Camera : OV7670
+
 ## System Architecture
 
 <img src="images/vga_top.png" width="800">
@@ -23,7 +28,7 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 - Main Controller에 노트 정보와 게임 종료 신호를 전달
 
 **Main Controller**
-- 게임 state 관리 (IDLE -> SELECT -> READY -> GAMECONT -> DONE)
+- 게임 state 관리
 - 노트 생성 및 이동 제어
 - 판정 및 점수 계산
 
@@ -33,8 +38,8 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 - 노트 위치와 게임 화면을 VGA에 출력
 
 **Sender (UART)**
-- 게임 상태, 버튼 입력, 판정 결과 및 점수 정보를 FIFO에 저장
-- UART를 통해 Python으로 전송
+- 게임 정보를 UART 전송 패킷으로 생성
+- FIFO를 통해 UART로 전송
 
 ## Receiver
 
