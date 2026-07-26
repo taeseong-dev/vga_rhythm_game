@@ -112,7 +112,7 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 
 <img src="images/vga_cam_bd.png">
 
-#### OV7670
+#### Camera Interface
 
 <img src="images/vga_ov7670.png" width = "500">
 
@@ -137,4 +137,23 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 - 카메라 영상 데이터를 저장하는 Frame Buffer
 - 쓰기와 읽기를 독립적인 클록으로 처리 (pclk, rclk)
 
+#### Game Processing
 
+<img src="images/vga_rgb.png" width = "500">
+
+##### Region Detector
+
+- 카메라 영상에서 빨간색 마커를 검출
+- 마커가 위치한 게임 영역(Region)을 판별
+
+##### Filter Region
+
+- 검출된 Region을 강조하여 카메라 영상에 표시
+
+##### Filter Note
+
+- 게임 노트를 생성하여 화면에 표시
+
+##### Filter Game
+
+- Lane 구분선 및 판정 영역을 화면에 표시
