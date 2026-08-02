@@ -17,7 +17,7 @@ import os as _os
 # 경로 설정
 # ============================================================
 # assets 폴더: 앨범 아트 등 정적 리소스가 저장되는 디렉토리 (사용자가 music_data/sing_main_image 로 이전함)
-_MUSIC_DATA_DIR = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), "..", "music_data"))
+_MUSIC_DATA_DIR = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), "music_data"))
 _IMAGE_DIR = _os.path.join(_MUSIC_DATA_DIR, "sing_main_image")
 
 # ============================================================
