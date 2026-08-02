@@ -92,8 +92,8 @@ VGA 화면의 노트와 비교하여 게임 판정 및 점수를 계산하는 FP
 <img src="images/vga_linecount_bd.png" width="600">
 
 - `note_start` 입력 시 `lane_data[3:0]`를 새로운 노트 데이터로 저장
-- 노트별 Lane 정보를 `o_pos0`~`o_pos15`로 관리
-- 노트별 세로 위치를 `o_lcnt0`~`o_lcnt15`로 관리
+- 노트별 Lane 정보를 `o_pos0 ~ o_pos15`로 관리
+- 노트별 세로 위치를 `o_lcnt0 ~ o_lcnt15`로 관리
 - VGA Frame마다 활성화된 노트의 세로 위치 이동
 - 화면을 벗어난 노트 데이터는 초기화
 
