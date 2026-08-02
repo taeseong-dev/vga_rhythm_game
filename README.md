@@ -103,8 +103,8 @@ VGA 화면의 노트와 비교하여 게임 판정 및 점수를 계산하는 FP
 
 #### GameResult
 
-- 노트가 생성된 Lane인 `o_pos0`~`o_pos15`와 빨간색 마커가 검출된 `region[3:0]`을 비교
-- Lane이 일치하면 해당 노트의 `o_lcnt0`~`o_lcnt15` 값에 따라 Perfect 또는 Good 판정
+- 노트가 생성된 Lane인 `o_pos0 ~ o_pos15`와 빨간색 마커가 검출된 `region[3:0]`을 비교
+- Lane이 일치하면 해당 노트의 `o_lcnt0 ~ o_lcnt15` 값에 따라 Perfect 또는 Good 판정
 - 판정 영역을 통과할 때까지 일치하는 입력이 없으면 Miss 판정
 - 판정 결과를 기준으로 Combo와 Fever 상태 생성
 
@@ -159,7 +159,7 @@ VGA 화면의 노트와 비교하여 게임 판정 및 점수를 계산하는 FP
 
 #### Filter Note
 
-- `note_x0`~`note_x15`와 `note_y0`~`note_y15`를 기준으로 노트 표시
+- `note_x0 ~ note_x15`와 `note_y0 ~ note_y15`를 기준으로 노트 표시
 
 #### Filter Game
 
