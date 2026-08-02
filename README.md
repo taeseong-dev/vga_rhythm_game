@@ -1,121 +1,117 @@
 # FPGA-based VGA Rhythm Game
 
-OV7670 카메라와 VGA를 기반으로 구현한 FPGA 리듬게임입니다.
+OV7670 카메라로 빨간색 마커의 위치를 검출하고,<br>
+VGA 화면의 노트와 비교하여 게임 판정 및 점수를 계산하는 FPGA 기반 리듬게임입니다.
+
+---
 
 ## Demo
 
-https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
+[▶ FPGA Rhythm Game 동작 영상](https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377)
 
-- Language : Verilog, Python
-- Tool : Vivado 2020.2, Pygame
-- Board : Basys3
-- Camera : OV7670
+---
+
+## Overview
+
+| 항목 | 내용 |
+|:---|:---|
+| Language | Verilog, SystemVerilog, Python |
+| Development Environment | Vivado 2020.2 |
+| FPGA Board | Basys3 |
+| Camera | OV7670 |
+| Interface | VGA, UART, SCCB |
+| Features | Note Control, Region Detection, Game Judgment, Score Calculation |
+
+---
+
+## Contents
+
+- [System Architecture](#system-architecture)
+- [UART Receiver](#uart-receiver)
+- [Main Controller](#main-controller)
+  - [Main Control FSM](#main-control-fsm)
+  - [Line Count](#line-count)
+  - [Game Result and Score](#game-result-and-score)
+- [VGAcam](#vgacam)
+  - [Camera Interface](#camera-interface)
+  - [Game Processing](#game-processing)
+- [UART Sender](#uart-sender)
+- [Python Application](#python-application)
+
+---
 
 ## System Architecture
 
 <img src="images/vga_top.png" width="800">
 
-1. Python에서 노트 데이터를 UART로 전송
-2. FPGA가 노트를 생성하여 VGA에 출력
-3. 카메라로 Region을 검출
-4. 노트와 Region을 비교하여 판정
-5. 점수와 결과를 Python으로 전송
+1. Python에서 노트의 Lane 정보와 게임 종료 데이터를 UART로 전송
+2. UART Receiver에서 Lane 정보를 수신하고 노트 생성 신호 출력
+3. Main Controller에서 최대 16개의 노트 데이터를 관리하고 화면의 세로 위치를 이동
+4. OV7670 영상의 4개 Lane에서 빨간색 마커 검출
+5. 노트가 위치한 Lane과 빨간색 마커가 검출된 Lane을 확인하고, 입력 시점의 노트 위치에 따라 게임 판정
+6. 카메라 영상과 게임 화면을 합성하여 VGA로 출력
+7. 게임 상태, 판정 결과, Combo 및 점수를 UART로 Python에 전송
 
-### 주요 모듈
+---
 
-**Receiver (UART)**
-- Python으로부터 노트 데이터를 수신
-- Main Controller에 노트 정보와 게임 종료 신호를 전달
-
-**Main Controller**
-- 게임 state 관리
-- 노트 생성 및 이동 제어
-- 판정 및 점수 계산
-
-**VGA Cam**
-- OV7670 초기 설정 및 영상데이터 수신
-- 빨간색 손모양의 Region 정보를 Main Controller로 전달
-- 노트 위치와 게임 화면을 VGA에 출력
-
-**Sender (UART)**
-- 게임 정보를 UART 전송 패킷으로 생성
-- FIFO를 통해 UART로 전송
-
-## Receiver
+## UART Receiver
 
 ### Block Diagram
 
 <img src="images/vga_receiver.png" width="400">
 
-### Output Signals
-
-- **note_start**
-  - 새로운 노트 생성을 Main Controller에 요청하는 신호
-
-- **lane_data[3:0]**
-  - 생성할 노트의 Lane 정보를 전달하는 신호
-  - 예) `4'b0100` : 왼쪽에서 두 번째 Lane에 노트 생성
-
-- **game_done**
-  - 게임 종료를 Main Controller에 알리는 신호
-  - 종료 데이터(`4'hF`)를 수신하면 출력
+- Python에서 전송한 8-bit UART Data 수신
+- 하위 4-bit를 Lane Data로 저장하고, 각 Bit를 해당 Lane의 노트 생성 정보로 사용
+- 저장된 Lane Data를 `v_sync` Rising Edge에서 `lane_data[3:0]`와 `note_start`로 출력
+- 상위 4-bit가 `4'hF`이면 게임 종료 신호로 해석하여 `game_done` 출력
  
 ## Main Controller
 
 ### Block Diagram
 
-<img src="images/apb_maincontroller.png" width="1000">
+<img src="images/vga_maincontroller.png" width="1000">
 
-#### Main Control
+- Main Control에서 게임 상태와 음악 선택 정보 관리
+- Line Count에서 `lane_data[3:0]`를 저장하고 노트별 Lane과 세로 위치 출력
+- GameResult에서 노트의 Lane 정보, 세로 위치 및 `region[3:0]`을 기준으로 게임 판정
+- Score에서 판정 결과, Combo 및 Fever 상태를 기준으로 점수 계산
 
-- 게임의 전체 흐름을 제어하는 FSM
+### Main Control FSM
 
 <img src="images/vga_maincontrol_fsm.png" width="600">
 
-- **IDLE**
-  - 게임 시작 전 대기
+- **IDLE**: 게임 시작 대기
+- **SELECT**: 버튼 입력을 통해 음악 선택
+- **READY**: 게임 시작 전 3초 대기
+- **GAME_CONT**: 게임 진행
+- **RESULT**: 게임 결과 출력 및 확인 입력 대기
+- **DONE**: 게임 종료 신호 출력 및 재시작 대기
 
-- **SELECT**
-  - 플레이할 음악 선택
-
-- **READY**
-  - 게임 초기화 및 시작 준비
-
-- **GAME_CONT**
-  - 노트 생성, 판정 및 게임 진행
-
-- **CAPTURE**
-  - 게임 종료 후 카메라 영상 캡처
-
-- **DONE**
-  - 결과 화면 출력 및 게임 종료
-
-
-
-#### **Line count**
+### Line Count
 
 <img src="images/vga_linecount_bd.png" width="600">
 
-- `note_start` 신호 입력 시 노트 생성
-- Vertical Sync마다 line count + 3
-- 최대 16개의 노트 동시 관리
-- 화면을 벗어난 노트 비활성화
+- `note_start` 입력 시 `lane_data[3:0]`를 새로운 노트 데이터로 저장
+- 노트별 Lane 정보를 `o_pos0`~`o_pos15`로 관리
+- 노트별 세로 위치를 `o_lcnt0`~`o_lcnt15`로 관리
+- VGA Frame마다 활성화된 노트의 세로 위치 이동
+- 화면을 벗어난 노트 데이터는 초기화
 
-##### **GameResult, Score**
+### Game Result and Score
 
 <img src="images/vga_game_bd.png" width="800">
 
-###### GameResult
+#### GameResult
 
-- 노트 위치와 카메라 입력을 비교하여 Perfect, Good, Miss 판정
-- 콤보 및 Fever 상태 생성
-- 판정 결과를 Score 모듈에 전달
+- 노트가 생성된 Lane인 `o_pos0`~`o_pos15`와 빨간색 마커가 검출된 `region[3:0]`을 비교
+- Lane이 일치하면 해당 노트의 `o_lcnt0`~`o_lcnt15` 값에 따라 Perfect 또는 Good 판정
+- 판정 영역을 통과할 때까지 일치하는 입력이 없으면 Miss 판정
+- 판정 결과를 기준으로 Combo와 Fever 상태 생성
 
-###### Score
+#### Score
 
-- Perfect, Good 판정에 따른 기본 점수 계산
-- Fever 상태에서 점수 2배 적용
-- 콤보 종료 시 추가 보너스 점수 계산
+- Perfect와 Good 판정에 따라 기본 점수 계산
+- Fever 상태에서는 기본 점수를 2배로 적용
 
 ## VGAcam
 
@@ -123,91 +119,95 @@ https://github.com/user-attachments/assets/dcfb6514-df86-4189-b6a7-1a21a0237377
 
 <img src="images/vga_cam_bd.png">
 
-#### Camera Interface
+### Camera Interface
 
 <img src="images/vga_ov7670.png" width = "500">
 
-##### VGA_Decoder
+#### VGA Decoder
 
-- VGA 출력을 위한 Pixel Clock 생성
-- VGA의 HSYNC, VSYNC 신호 생성
-- x_pixel, y_pixel 및 DE신호 생성
+- 100 MHz Clock을 기준으로 VGA Pixel Timing 생성
+- `HSYNC`, `VSYNC`, `x_pixel`, `y_pixel`, `DE` 출력
 
-##### OV7670_SCCB_Controller
+#### OV7670 SCCB Controller
 
-- OV7670 초기화 및 레지스터 설정을 위한 SCCB 통신 제어 (I2C)
+- SCCB 통신을 통해 OV7670 초기화 및 레지스터 설정
 - 설정 데이터를 순차적으로 전송하여 카메라 동작 환경 구성
 
-##### OV7670_Mem_Controller
+#### OV7670 Mem Controller
 
-- OV7670에서 수신한 픽셀 데이터를 Frame Buffer에 저장하기 위한 모듈
-- Frame Buffer의 Write Address 및 Data 생성
+- OV7670에서 연속으로 수신한 8-bit Pixel Data 2개로 16-bit RGB565 Data 생성
+- Frame Buffer에 저장할 Write Address, Data 및 Write Enable 생성
 
-##### Frame_Buffer
+#### Frame Buffer
 
-- 카메라 영상 데이터를 저장하는 Frame Buffer
-- 쓰기와 읽기를 독립적인 클록으로 처리 (pclk, rclk)
+- 카메라의 RGB565 영상 데이터 저장
+- `pclk`에서 데이터를 저장하고 VGA Read Clock에서 데이터 출력
 
-#### Game Processing
+### Game Processing
 
 <img src="images/vga_rgb_bd.png" width = "800">
 
-##### Region Detector
+#### Region Detector
 
-- 카메라 영상에서 빨간색 마커를 검출
-- 마커가 위치한 게임 영역(Region)을 판별
+- 카메라 화면을 4개 Lane으로 구분
+- 각 Lane의 빨간색 Pixel 수를 기반으로 마커가 위치한 Lane을 판별하고 `region[3:0]`으로 출력
 
-##### Filter Region
+#### Filter Region
 
-- 검출된 Region을 강조하여 카메라 영상에 표시
+- RGB565 Data에서 R/G/B 각 색상의 상위 4-bit를 선택하여 12-bit RGB Data로 사용
+- `region[3:0]`을 기준으로 빨간색 마커가 검출된 Lane 표시
 
-##### Filter Note
+#### Filter Note
 
-- 게임 노트를 생성하여 화면에 표시
+- `note_x0`~`note_x15`와 `note_y0`~`note_y15`를 기준으로 노트 표시
 
-##### Filter Game
+#### Filter Game
 
-- Lane 구분선 및 판정 영역을 화면에 표시
+- Lane 구분선과 판정 영역 표시
 
-## Sender
+## UART Sender
 
 <img src="images/vga_sender.png" width = "800">
 
 ### Packet Generator
 
-- 게임 정보를 UART 전송 패킷으로 생성
-- 게임 상태, 판정 결과, 콤보 및 점수 데이터 구성
-- Byte 단위 패킷 데이터 출력
+- 게임 상태, 버튼 입력 또는 판정 결과가 변경되면 UART Packet 생성
+- 게임 상태, 판정 결과, Combo 및 24-bit Score를 7-byte Packet으로 구성
+
+| Byte | Data |
+|:---|:---|
+| 0 | Header (`8'hFF`) |
+| 1 | Game State, Button |
+| 2 | Fever, Perfect, Good, Miss |
+| 3 | Combo |
+| 4 | Score `[7:0]` |
+| 5 | Score `[15:8]` |
+| 6 | Score `[23:16]` |
 
 ### FIFO
 
-- UART 송신 데이터 저장
-- 송신 데이터 버퍼 관리
+- Packet Generator에서 생성한 Byte Data 저장
+- UART TX 상태에 맞춰 저장된 데이터를 순서대로 출력
 
 ### UART TX
 
-- UART 프로토콜 기반 직렬 데이터 송신
-- FIFO 데이터 -> Serial TX 신호 출력
+- FIFO에서 출력된 8-bit Data를 UART로 전송
+- 115,200 bps로 Serial TX 신호 출력
 
-## Python
+## Python Application
 
-### Modules
+### UART Handler
 
-#### UART Handler
+- 노트의 Lane 정보와 게임 종료 데이터를 UART로 FPGA에 전송
+- FPGA에서 전송한 7-byte Packet을 수신하고 게임 정보로 분리
 
-- FPGA와 UART 통신 수행
-- FPGA에서 받은 데이터 확인
-- 게임 정보를 화면으로 전달
+### Game UI
 
-#### Game UI
+- 음악 재생 시점에 맞춰 노트 데이터 전송
+- FPGA에서 수신한 게임 상태, 판정 결과, Combo 및 Score 표시
+- 게임 상태에 따라 선택, 진행 및 결과 화면 출력
 
-- 게임 화면 표시
-- 게임 진행 상태 관리
-- FPGA 상태에 따라 화면 전환
-- 게임 결과 표시
+### Config
 
-#### Config
-
-- UART 통신 설정 관리
-- 게임 환경 설정
-- 화면 및 상태 정보 관리
+- UART Port와 Baud Rate 설정
+- 게임 화면 및 음악 관련 설정값 관리
