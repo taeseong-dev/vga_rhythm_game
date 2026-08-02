@@ -307,7 +307,7 @@ class GameScreen(BaseScreen):
         if not mem_filename:
             return
             
-        rom_path = os.path.join(config._MUSIC_DATA_DIR, "rom_data", mem_filename)
+        rom_path = os.path.join(config._MUSIC_DATA_DIR, mem_filename)
         
         try:
             with open(rom_path, "r") as f:
