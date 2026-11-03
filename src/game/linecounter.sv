@@ -177,7 +177,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos0 <= 0;
         end
-        else if(cnt == 0 && i_note) begin
+        else if(cnt == 0 && i_note && !r_en0) begin
             r_pos0 <= i_lane;
         end
         else begin
@@ -189,7 +189,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos1 <= 0;
         end
-        else if(cnt == 1 && i_note) begin
+        else if(cnt == 1 && i_note && !r_en1) begin
             r_pos1 <= i_lane;
         end
         else begin
@@ -201,7 +201,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos2 <= 0;
         end
-        else if(cnt == 2 && i_note) begin
+        else if(cnt == 2 && i_note && !r_en2) begin
             r_pos2 <= i_lane;
         end
         else begin
@@ -213,7 +213,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos3 <= 0;
         end
-        else if(cnt == 3 && i_note) begin
+        else if(cnt == 3 && i_note && !r_en3) begin
             r_pos3 <= i_lane;
         end
         else begin
@@ -225,7 +225,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos4 <= 0;
         end
-        else if(cnt == 4 && i_note) begin
+        else if(cnt == 4 && i_note && !r_en4) begin
             r_pos4 <= i_lane;
         end
         else begin
@@ -237,7 +237,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos5 <= 0;
         end
-        else if(cnt == 5 && i_note) begin
+        else if(cnt == 5 && i_note && !r_en5) begin
             r_pos5 <= i_lane;
         end
         else begin
@@ -249,7 +249,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos6 <= 0;
         end
-        else if(cnt == 6 && i_note) begin
+        else if(cnt == 6 && i_note && !r_en6) begin
             r_pos6 <= i_lane;
         end
         else begin
@@ -261,7 +261,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos7 <= 0;
         end
-        else if(cnt == 7 && i_note) begin
+        else if(cnt == 7 && i_note && !r_en7) begin
             r_pos7 <= i_lane;
         end
         else begin
@@ -273,7 +273,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos8 <= 0;
         end
-        else if(cnt == 8 && i_note) begin
+        else if(cnt == 8 && i_note && !r_en8) begin
             r_pos8 <= i_lane;
         end
         else begin
@@ -285,7 +285,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos9 <= 0;
         end
-        else if(cnt == 9 && i_note) begin
+        else if(cnt == 9 && i_note && !r_en9) begin
             r_pos9 <= i_lane;
         end
         else begin
@@ -297,7 +297,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos10 <= 0;
         end
-        else if(cnt == 10 && i_note) begin
+        else if(cnt == 10 && i_note && !r_en10) begin
             r_pos10 <= i_lane;
         end
         else begin
@@ -309,7 +309,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos11 <= 0;
         end
-        else if(cnt == 11 && i_note) begin
+        else if(cnt == 11 && i_note && !r_en11) begin
             r_pos11 <= i_lane;
         end
         else begin
@@ -321,7 +321,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos12 <= 0;
         end
-        else if(cnt == 12 && i_note) begin
+        else if(cnt == 12 && i_note && !r_en12) begin
             r_pos12 <= i_lane;
         end
         else begin
@@ -333,7 +333,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos13 <= 0;
         end
-        else if(cnt == 13 && i_note) begin
+        else if(cnt == 13 && i_note && !r_en13) begin
             r_pos13 <= i_lane;
         end
         else begin
@@ -345,7 +345,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos14 <= 0;
         end
-        else if(cnt == 14 && i_note) begin
+        else if(cnt == 14 && i_note && !r_en14) begin
             r_pos14 <= i_lane;
         end
         else begin
@@ -357,7 +357,7 @@ always @ (posedge clk or posedge reset) begin
         if(reset) begin
             r_pos15 <= 0;
         end
-        else if(cnt == 15 && i_note) begin
+        else if(cnt == 15 && i_note && !r_en15) begin
             r_pos15 <= i_lane;
         end
         else begin
